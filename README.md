@@ -8,8 +8,7 @@ Because sometimes you just need everything to go **boom** and disappear. No more
 
 ## Screenshot
 
-<!-- Add your screenshot here -->
-![Boom Menu Bar](screenshot.png)
+<img width="199" height="210" alt="Image" src="https://github.com/user-attachments/assets/21b1ddc5-c788-4ccb-984b-927f51b7d149" />
 
 ## Features
 
