@@ -169,7 +169,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // First, force close all apps
         forceCloseAll()
 
-        // Then shut down the Mac
+        // Clear saved application state to prevent apps from reopening
+        let savedStateDir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Saved Application State")
+        try? FileManager.default.removeItem(at: savedStateDir)
+
+        // Shut down the Mac
         let script = NSAppleScript(source: "tell application \"System Events\" to shut down")
         script?.executeAndReturnError(nil)
     }
