@@ -77,6 +77,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         forceShutDownItem.target = self
         menu.addItem(forceShutDownItem)
 
+        // Force Restart
+        let forceRestartItem = NSMenuItem(
+            title: "Force Restart",
+            action: #selector(forceRestart),
+            keyEquivalent: ""
+        )
+        forceRestartItem.target = self
+        menu.addItem(forceRestartItem)
+
         menu.addItem(NSMenuItem.separator())
 
         // Launch at Login
@@ -133,9 +142,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func forceCloseAll() {
         let runningApps = NSWorkspace.shared.runningApplications
-
-        // Get the bundle identifier of this app to exclude it
-        let myBundleID = Bundle.main.bundleIdentifier
+        let myPID = ProcessInfo.processInfo.processIdentifier
 
         // System apps and processes to exclude
         let excludedBundleIDs: Set<String> = [
@@ -149,29 +156,84 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         for app in runningApps {
             // Skip this app
-            if let bundleID = app.bundleIdentifier, bundleID == myBundleID {
-                continue
-            }
+            if app.processIdentifier == myPID { continue }
 
             // Skip system apps
-            if let bundleID = app.bundleIdentifier, excludedBundleIDs.contains(bundleID) {
-                continue
-            }
+            if let bundleID = app.bundleIdentifier, excludedBundleIDs.contains(bundleID) { continue }
 
             // Only force quit regular apps (not background agents)
             if app.activationPolicy == .regular {
-                app.forceTerminate()
+                kill(app.processIdentifier, SIGKILL)
+            }
+        }
+    }
+
+    private func prepareForCleanShutdown() {
+        // Disable "Reopen windows when logging back in" globally
+        let disableGlobal = Process()
+        disableGlobal.launchPath = "/usr/bin/defaults"
+        disableGlobal.arguments = ["write", "-g", "NSQuitAlwaysKeepsWindows", "-bool", "false"]
+        try? disableGlobal.run()
+        disableGlobal.waitUntilExit()
+
+        let disableReopen = Process()
+        disableReopen.launchPath = "/usr/bin/defaults"
+        disableReopen.arguments = ["write", "com.apple.loginwindow", "TALLogoutSavesState", "-bool", "false"]
+        try? disableReopen.run()
+        disableReopen.waitUntilExit()
+
+        // Clear saved application state folder FIRST
+        let savedStateDir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Saved Application State")
+        try? FileManager.default.removeItem(at: savedStateDir)
+
+        // Kill all apps with SIGKILL (no chance to save state)
+        let runningApps = NSWorkspace.shared.runningApplications
+        let myPID = ProcessInfo.processInfo.processIdentifier
+        let excludedBundleIDs: Set<String> = [
+            "com.apple.finder", "com.apple.dock", "com.apple.SystemUIServer",
+            "com.apple.WindowManager", "com.apple.controlcenter", "com.apple.notificationcenterui"
+        ]
+
+        for app in runningApps {
+            if app.processIdentifier == myPID { continue }
+            if let bundleID = app.bundleIdentifier, excludedBundleIDs.contains(bundleID) { continue }
+            if app.activationPolicy == .regular {
+                kill(app.processIdentifier, SIGKILL)
+            }
+        }
+
+        // Clear saved state again
+        try? FileManager.default.removeItem(at: savedStateDir)
+
+        // Clear ByHost loginwindow preferences
+        let byHostDir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Preferences/ByHost")
+        if let files = try? FileManager.default.contentsOfDirectory(atPath: byHostDir.path) {
+            for file in files where file.contains("com.apple.loginwindow") {
+                try? FileManager.default.removeItem(at: byHostDir.appendingPathComponent(file))
             }
         }
     }
 
     @objc private func forceShutDown() {
-        // First, force close all apps
-        forceCloseAll()
+        prepareForCleanShutdown()
 
-        // Then shut down the Mac
-        let script = NSAppleScript(source: "tell application \"System Events\" to shut down")
-        script?.executeAndReturnError(nil)
+        // Shut down
+        let shutdown = Process()
+        shutdown.launchPath = "/usr/bin/osascript"
+        shutdown.arguments = ["-e", "tell application \"System Events\" to shut down"]
+        try? shutdown.run()
+    }
+
+    @objc private func forceRestart() {
+        prepareForCleanShutdown()
+
+        // Restart
+        let restart = Process()
+        restart.launchPath = "/usr/bin/osascript"
+        restart.arguments = ["-e", "tell application \"System Events\" to restart"]
+        try? restart.run()
     }
 
     @objc private func showAbout() {
