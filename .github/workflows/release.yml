@@ -2,11 +2,6 @@ name: Build and Release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version tag (e.g., 1.0.0)'
-        required: true
-        type: string
 
 jobs:
   build:
@@ -22,6 +17,13 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(xcodebuild -project boom.xcodeproj -scheme boom -showBuildSettings 2>/dev/null | grep "MARKETING_VERSION" | head -1 | sed 's/.*= //')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Detected version: ${VERSION}"
+
       - name: Build app
         run: |
           chmod +x build.sh
@@ -35,13 +37,13 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.event.inputs.version }}
-          name: Boom v${{ github.event.inputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Boom v${{ steps.version.outputs.version }}
           body: |
-            ## Boom v${{ github.event.inputs.version }}
+            ## Boom v${{ steps.version.outputs.version }}
 
             ### Installation
-            1. Download `Boom-${{ github.event.inputs.version }}.zip`
+            1. Download `Boom-${{ steps.version.outputs.version }}.zip`
             2. Unzip and move `Boom.app` to your Applications folder
             3. Right-click → Open (first time only, to bypass Gatekeeper)
 
