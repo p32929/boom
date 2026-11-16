@@ -1,144 +1,67 @@
 # Boom
 
-A lightweight macOS menu bar utility that lets you force quit all running apps with a single click.
+Boom is a tiny macOS menu bar app that force quits all your open apps in one click. When several apps freeze, or you just want a clean slate, you don't have to quit them one by one or wait for each "not responding" window. Click once and they are gone, while Finder, the Dock and the rest of macOS keep running.
 
-## Why "Boom"?
-
-Because sometimes you just need everything to go **boom** and disappear. No more clicking through frozen apps one by one. No more waiting for unresponsive windows to close. Just one click, and *boom* — everything's gone.
-
-## Screenshot
-
-<img width="199" height="210" alt="Image" src="https://github.com/user-attachments/assets/21b1ddc5-c788-4ccb-984b-927f51b7d149" />
+<img width="199" height="210" alt="Boom menu" src="https://github.com/user-attachments/assets/21b1ddc5-c788-4ccb-984b-927f51b7d149" />
 
 ## Features
 
-- **Force Close All** — Instantly force quits all user applications (excludes essential system apps like Finder and Dock)
-- **Force Shut Down** — Force closes all apps and shuts down your Mac in one action
-- **Launch at Login** — Optionally start Boom automatically when you log in
-- **About** — View app info with links to the developer's profile and source code
-- **Lightweight** — Lives quietly in your menu bar, no dock icon, minimal resource usage
-- **Single Instance** — Prevents multiple instances from running simultaneously
+1. **Force Close All:** force quits every app you opened, in one click.
+2. **Force Shut Down:** closes every app and then shuts down your Mac.
+3. **Safe for your Mac:** it never closes Finder, the Dock, the menu bar, Control Center, Notification Center, background helpers or itself.
+4. **Launch at Login:** start Boom by itself when you log in, if you want.
+5. **Stays out of the way:** it lives only in the menu bar, with no Dock icon, and only one copy can run at a time.
 
-## How It Works
+## Download
 
-Boom uses macOS native APIs to:
+Download `Boom-1.2.zip` from the [releases page](https://github.com/p32929/boom/releases/latest), unzip it and move Boom to your Applications folder. It needs macOS 13 or newer.
 
-1. **Enumerate running applications** via `NSWorkspace.shared.runningApplications`
-2. **Force terminate** apps using `NSRunningApplication.forceTerminate()`
-3. **Trigger shutdown** via AppleScript when using Force Shut Down
+## How to use it
 
-### What gets closed?
+1. Open Boom. A bolt icon appears in the menu bar.
+2. Click the icon and pick one:
+   1. **Force Close All** closes all your apps right away.
+   2. **Force Shut Down** closes all your apps and shuts down the Mac.
+   3. **Launch at Login** turns auto-start on or off (a tick means on).
+   4. **About** shows the app info.
+   5. **Exit** quits Boom.
 
-Boom only force quits **regular user applications** (apps with visible windows). It intentionally excludes:
+## Good to know
 
-- Finder
-- Dock
-- System UI Server
-- Window Manager
-- Control Center
-- Notification Center
-- Background agents and daemons
-- Itself
+1. Force quitting does not ask to save, so unsaved work in those apps is lost. Save first.
+2. macOS may ask you to allow Boom to control other apps. You can allow it in **System Settings**, **Privacy & Security**, **Automation**.
+3. **Launch at Login** works best when Boom is in your Applications folder.
 
-This ensures your system remains stable while clearing out all your user apps.
+## How it works
 
-## Requirements
+1. It lists the open apps with `NSWorkspace.shared.runningApplications` and keeps only normal apps with windows.
+2. It closes them with `NSRunningApplication.forceTerminate()`.
+3. **Force Shut Down** asks macOS to shut down through AppleScript.
 
-- macOS 13.0 or later
-- Xcode 15.0 or later (for building)
+## Build it yourself
 
-## Installation
+You need Xcode 15 or newer.
 
-### Download
+```bash
+git clone https://github.com/p32929/boom.git
+cd boom
+open boom.xcodeproj
+```
 
-Download the latest release from the [Releases](https://github.com/p32929/boom/releases) page.
-
-### Build from Source
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/p32929/boom.git
-   cd boom
-   ```
-
-2. Open the project in Xcode:
-   ```bash
-   open boom.xcodeproj
-   ```
-
-3. Build and run:
-   - Select your Mac as the target device
-   - Press `Cmd + R` to build and run
-
-4. (Optional) Archive for distribution:
-   - Go to **Product → Archive**
-   - Export the app and move it to `/Applications`
-
-### Important Notes
-
-- **Launch at Login** works best when the app is run from a permanent location (e.g., `/Applications`)
-- The app requires permission to control other applications. You may need to grant permissions in **System Settings → Privacy & Security → Automation**
-
-## Usage
-
-1. Launch Boom — a bolt icon appears in your menu bar
-2. Click the icon to see options:
-   - **Force Close All** — Closes all user apps immediately
-   - **Force Shut Down** — Closes all apps and shuts down your Mac
-   - **Launch at Login** — Toggle auto-start (checkmark indicates enabled)
-   - **About** — View app information
-   - **Exit** — Quit Boom
-
-## Contributing
-
-Contributions are warmly welcomed and greatly appreciated! Whether it's a bug fix, new feature, or improvement, your input helps make this project better for everyone.
-
-Before submitting a pull request, please:
-
-1. Create an issue describing the feature or bug fix you'd like to work on
-2. Wait for discussion and approval to ensure alignment with project goals
-3. Fork the repository and create your feature branch
-4. Submit your pull request with a clear description of changes
-
-This approach helps avoid duplicate efforts and ensures smooth collaboration. Thank you for considering contributing!
-
-### Ideas for Contributions
-
-- Custom keyboard shortcuts
-- Confirmation dialog option before force closing
-- Exclude specific apps from force close
-- Menu bar icon customization
-- Localization support
-
-## Feedback
-
-Have feedback, suggestions, or found a bug? Feel free to:
-
-- [Open an issue](https://github.com/p32929/boom/issues)
-- Reach out via [GitHub](https://github.com/p32929)
-
-All feedback is appreciated!
+Pick your Mac as the target and press `Cmd + R`. To make an app you can keep, use **Product**, then **Archive**, export it and move it to Applications.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for the full text.
+MIT License. Copyright (c) 2026 Fayaz Bin Salam. See [LICENSE](LICENSE) for the full text.
 
-## Author
+## Contributing
 
-**p32929**
-
-- GitHub: [github.com/p32929](https://github.com/p32929)
-- Portfolio: [p32929.github.io](https://p32929.github.io)
+Contributions are very welcome. Please open an issue first to talk about what you'd like to add or change, so we can agree on it before you spend time on a pull request. Thank you!
 
 ## Share
 
-Sharing this repository with your friends is just one click away from here
+<a href="https://p32929.github.io/share/?repo=boom"><img src="https://p32929.github.io/readme/share.svg" alt="Share this with your friends in just a click" width="420"></a>
 
-[![facebook](https://user-images.githubusercontent.com/6418354/179013321-ac1d1452-0689-493f-9066-940cf2302b6e.png)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/p32929/boom/)
-[![twitter](https://user-images.githubusercontent.com/6418354/179013351-7d8d6d1c-4ce2-46ab-bef8-4c4765a1b888.png)](https://twitter.com/intent/tweet?url=https://github.com/p32929/boom/)
-[![tumblr](https://user-images.githubusercontent.com/6418354/179013343-3111f55a-3b90-40c7-8487-9777348672b0.png)](https://www.tumblr.com/share?v=3&u=https://github.com/p32929/boom/)
-[![pocket](https://user-images.githubusercontent.com/6418354/179013334-b095c45f-becf-49f4-9ee1-5a731a9b1f85.png)](https://getpocket.com/save?url=https://github.com/p32929/boom/)
-[![pinterest](https://user-images.githubusercontent.com/6418354/179013331-44cd9206-11b1-4b65-becb-5863b61c828f.png)](https://pinterest.com/pin/create/button/?url=https://github.com/p32929/boom/)
-[![reddit](https://user-images.githubusercontent.com/6418354/179013338-7416ae3f-73ba-4522-86e1-1374d7082d22.png)](https://www.reddit.com/submit?url=https://github.com/p32929/boom/)
-[![linkedin](https://user-images.githubusercontent.com/6418354/179013327-ca7b7102-1da8-4b1c-858f-1a6e5f21bd70.png)](https://www.linkedin.com/shareArticle?mini=true&url=https://github.com/p32929/boom/)
-[![whatsapp](https://user-images.githubusercontent.com/6418354/179013353-f477fa0b-3e6f-4138-a357-c9991b23ff88.png)](https://api.whatsapp.com/send?text=https://github.com/p32929/boom/)
+## Support
+
+<a href="https://p32929.github.io/support/"><img src="https://p32929.github.io/readme/support.svg" alt="If you like my works and want to support me, feel free to support" width="420"></a>
